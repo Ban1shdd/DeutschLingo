@@ -198,6 +198,7 @@
             position: relative;
             display: inline-block;
             margin-bottom: 25px;
+            width: 100%;
         }
 
         .prompt-card {
@@ -209,6 +210,7 @@
             font-weight: bold;
             cursor: help;
             text-align: center;
+            user-select: none;
         }
 
         .translation-hint {
@@ -228,7 +230,8 @@
             z-index: 10;
         }
 
-        .hover-translation-wrapper:hover .translation-hint {
+        .hover-translation-wrapper:hover .translation-hint,
+        .hover-translation-wrapper.touch-active .translation-hint {
             opacity: 1;
             visibility: visible;
         }
@@ -408,6 +411,11 @@
             margin-bottom: 15px;
         }
 
+        .danger-zone {
+            border: 2px solid #ffccd5;
+            background-color: #fff5f5;
+        }
+
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -447,6 +455,35 @@
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
+        }
+
+        .btn-warning {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-danger:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
 
         .pagination-controls {
@@ -516,6 +553,18 @@
                     <option value="50">Intense (50 XP / day)</option>
                 </select>
             </div>
+            <div class="dashboard-card">
+                <h3>Account Management</h3>
+                <p>Wipe your local training progress while keeping configurations active.</p>
+                <button class="btn-warning" onclick="handleResetProgress()">Reset All Progress</button>
+            </div>
+            <div class="dashboard-card danger-zone">
+                <h3>Danger Zone</h3>
+                <p>Permanently delete your system storage deployment. This setup clears everything.</p>
+                <p style="margin-top: 10px;">Type the word <strong>confirm</strong> below to run this action:</p>
+                <input type="text" id="delete-confirm-input" class="text-input" style="margin-top: 8px; margin-bottom: 8px;" placeholder="Type confirm here" oninput="validateDeleteInput()" />
+                <button id="delete-account-btn" class="btn-danger" onclick="executeAccountDeletion()" disabled>Delete My Account</button>
+            </div>
         </section>
 
         <section id="view-shop" class="view-section">
@@ -563,7 +612,7 @@
     </nav>
 
     <script>
-        let state = {
+        let defaultState = {
             currentLessonIndex: 0,
             xp: 0,
             streak: 0,
@@ -572,6 +621,8 @@
             dailyGoal: 30,
             currentViewUnit: 1
         };
+
+        let state = JSON.parse(JSON.stringify(defaultState));
 
         const tracks = [
             { id: 'basics', title: 'Basics & Essentials', desc: 'Days 1-73: Foundational words and structure.' },
@@ -639,9 +690,6 @@
 
         window.onload = function() {
             loadProgress();
-            if (!state.currentViewUnit) {
-                state.currentViewUnit = 1;
-            }
             renderPath();
             updateUIStats();
         };
@@ -663,6 +711,39 @@
                 } catch (e) {
                     console.error("Error loading state", e);
                 }
+            }
+        }
+
+        function handleResetProgress() {
+            const check = confirm("Are you sure you want to clear your current level rankings? This operational data clear cannot be recovered.");
+            if (check) {
+                state.completedLessons = [];
+                state.xp = 0;
+                state.streak = 0;
+                state.hearts = 5;
+                saveProgress();
+                updateUIStats();
+                renderPath();
+                alert("Your profile data maps have dropped back to scratch benchmarks.");
+            }
+        }
+
+        function validateDeleteInput() {
+            const val = document.getElementById("delete-confirm-input").value.trim();
+            document.getElementById("delete-account-btn").disabled = (val !== "confirm");
+        }
+
+        function executeAccountDeletion() {
+            const val = document.getElementById("delete-confirm-input").value.trim();
+            if (val === "confirm") {
+                localStorage.removeItem('deutschlingo_state');
+                state = JSON.parse(JSON.stringify(defaultState));
+                document.getElementById("delete-confirm-input").value = "";
+                validateDeleteInput();
+                updateUIStats();
+                switchView('learn', document.querySelector('.nav-bar button'));
+                renderPath();
+                alert("Your deployment container data partition was wiped completely.");
             }
         }
 
@@ -741,6 +822,7 @@
             document.getElementById('stats-streak').innerText = `${state.streak} Days`;
             document.getElementById('stats-level').innerText = `Level ${Math.floor(state.xp / 100) + 1}`;
             document.getElementById('daily-goal-select').value = state.dailyGoal;
+            validateDeleteInput();
         }
 
         function saveDailyGoal() {
@@ -805,7 +887,17 @@
 
             const translationWrapper = document.createElement('div');
             translationWrapper.className = 'hover-translation-wrapper';
-            translationWrapper.style.width = '100%';
+
+            // Mobile compatibility setup for active press state toggling
+            translationWrapper.addEventListener('touchstart', function() {
+                translationWrapper.classList.add('touch-active');
+            }, {passive: true});
+
+            translationWrapper.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    translationWrapper.classList.remove('touch-active');
+                }, 1500);
+            }, {passive: true});
 
             const promptCard = document.createElement('div');
             promptCard.className = 'prompt-card';
