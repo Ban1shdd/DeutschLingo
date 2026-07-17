@@ -139,19 +139,6 @@
             font-size: 18px;
             font-weight: 800;
         }
-        .continue-btn {
-            width: 100%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            padding: 16px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 16px;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -179,8 +166,6 @@
         <div class="feedback-panel" id="feedback-panel">
             <div class="feedback-text">Excellent work!</div>
         </div>
-
-        <button class="continue-btn" id="continue-btn" onclick="nextQuestion()">Continue</button>
     </div>
 
     <script>
@@ -201,7 +186,6 @@
         const gridEl = document.getElementById('options-grid');
         const progressEl = document.getElementById('progress-bar');
         const feedbackEl = document.getElementById('feedback-panel');
-        const continueBtn = document.getElementById('continue-btn');
         const streakEl = document.getElementById('streak-val');
         const xpEl = document.getElementById('xp-val');
 
@@ -214,8 +198,6 @@
 
         function loadQuestion() {
             feedbackEl.style.display = 'none';
-            continueBtn.style.display = 'none';
-            
             if (currentIndex >= courseData.length) {
                 promptEl.textContent = "Course Completed!";
                 hintEl.textContent = "You finished all available items for today.";
@@ -254,20 +236,22 @@
                 updateStats();
                 
                 feedbackEl.style.display = 'block';
-                continueBtn.style.display = 'block';
+
+                setTimeout(() => {
+                    currentIndex++;
+                    loadQuestion();
+                }, 1500);
             } else {
                 clickedBtn.classList.add('wrong');
                 streak = 0;
                 updateStats();
                 
                 buttons[current.correct].classList.add('correct');
-                continueBtn.style.display = 'block';
-            }
-        }
 
-        function nextQuestion() {
-            currentIndex++;
-            loadQuestion();
+                setTimeout(() => {
+                    loadQuestion();
+                }, 2000);
+            }
         }
 
         updateStats();
