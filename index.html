@@ -194,7 +194,6 @@
             margin-bottom: 30px;
         }
 
-        /* Hover translation functionality rules */
         .hover-translation-wrapper {
             position: relative;
             display: inline-block;
@@ -487,7 +486,6 @@
     </header>
 
     <div class="main-container">
-        <!-- LEARN VIEW -->
         <section id="view-learn" class="view-section active">
             <div class="unit-header">
                 <h2 id="unit-title">Loading Course...</h2>
@@ -500,7 +498,6 @@
             <div class="path-container" id="path-container"></div>
         </section>
 
-        <!-- STATS VIEW -->
         <section id="view-stats" class="view-section">
             <div class="dashboard-card">
                 <h3>Your Progress</h3>
@@ -521,7 +518,6 @@
             </div>
         </section>
 
-        <!-- SHOP VIEW -->
         <section id="view-shop" class="view-section">
             <div class="dashboard-card">
                 <h3>Power-Ups</h3>
@@ -543,7 +539,6 @@
         </section>
     </div>
 
-    <!-- LESSON SYSTEM MODAL -->
     <div class="modal" id="lesson-modal">
         <div class="modal-header">
             <button class="close-btn" onclick="quitLesson()">✕</button>
@@ -568,7 +563,6 @@
     </nav>
 
     <script>
-        // Core State
         let state = {
             currentLessonIndex: 0,
             xp: 0,
@@ -809,7 +803,6 @@
             title.innerText = question.prompt;
             contentArea.appendChild(title);
 
-            // Container for hover setup
             const translationWrapper = document.createElement('div');
             translationWrapper.className = 'hover-translation-wrapper';
             translationWrapper.style.width = '100%';
@@ -942,6 +935,10 @@
             const actionBtn = document.getElementById('footer-action-btn');
             actionBtn.innerText = "Continue";
             actionBtn.onclick = advanceLessonFlow;
+
+            setTimeout(() => {
+                feedbackBar.style.display = 'none';
+            }, 1200);
         }
 
         function advanceLessonFlow() {
